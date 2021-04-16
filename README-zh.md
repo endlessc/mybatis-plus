@@ -9,7 +9,7 @@
 </p>
 
 <p align="center">
-  <a href="https://search.maven.org/#search%7Cga%7C1%7Cg%3A%22com.baomidou%22%20AND%20a%3A%22mybatis-plus%22">
+  <a href="https://search.maven.org/search?q=g:com.baomidou%20a:mybatis-*">
     <img alt="maven" src="https://img.shields.io/maven-central/v/com.baomidou/mybatis-plus.svg?style=flat-square">
   </a>
 
@@ -22,7 +22,7 @@
 
 Mybatis 增强工具包 - 只做增强不做改变，简化`CRUD`操作
 
-技术讨论 QQ 群 ： 576493122 🈵  、  648281531 、  643509491
+技术讨论 QQ 群 ： 183066216 、  576493122 🈵  、  648281531 🈵 、  643509491 🈵
 
 # 优点 | Advantages
 
@@ -38,9 +38,12 @@ Mybatis 增强工具包 - 只做增强不做改变，简化`CRUD`操作
 - **内置性能分析插件**：可输出Sql语句以及其执行时间，建议开发测试时启用该功能，能有效解决慢查询
 - **内置全局拦截插件**：提供全表 delete 、 update 操作智能分析阻断，预防误操作
 
-# 文档 | Documentation
+## 相关链接 | Links
 
-[中文](https://mybatis.plus)
+- [文档](https://mybatis.plus)
+- [代码生成](https://github.com/baomidou/generator)
+- [功能示例](https://gitee.com/baomidou/mybatis-plus-samples)
+- [展示](https://github.com/baomidou/awesome-mybatis-plus)
 
 # 原理 | Principle
 
@@ -52,13 +55,11 @@ Mybatis 增强工具包 - 只做增强不做改变，简化`CRUD`操作
 
 [Spring-Boot](https://gitee.com/baomidou/mybatisplus-spring-boot)
 
-[mybatisplus-sharding-jdbc](https://gitee.com/baomidou/mybatisplus-sharding-jdbc)
-
 [SSM-实战 Demo](https://gitee.com/juapk/SpringWind)
 
-# [点此查看仓库](https://search.maven.org/search?q=g:com.baomidou%20a:mybatis-*)
+# Latest Version: [![Maven Central](https://img.shields.io/maven-central/v/com.baomidou/mybatis-plus.svg)](https://search.maven.org/search?q=g:com.baomidou%20a:mybatis-*)
 
-```xml
+``` xml
 <dependency>
     <groupId>com.baomidou</groupId>
     <artifactId>mybatis-plus</artifactId>
@@ -71,11 +72,10 @@ Mybatis 增强工具包 - 只做增强不做改变，简化`CRUD`操作
 - [基于Cookie的SSO中间件 Kisso](https://gitee.com/baomidou/kisso)
 - [Java快速开发框架 SpringWind](https://gitee.com/juapk/SpringWind)
 - [基于Hibernate扩展 Hibernate-Plus](https://gitee.com/baomidou/hibernate-plus)
+- [基于 pac4j-jwt 的快速集成的 web 安全组件 shaun](https://gitee.com/baomidou/shaun)
 
 # 王者荣耀
-![MPTrophy](https://gitee.com/uploads/images/2018/0102/101803_2fdba060_12260.jpeg)
-
-![MPTrophy](https://images.gitee.com/uploads/images/2018/1218/151845_f562bcb5_12260.png)
+![MPTrophy](https://images.gitee.com/uploads/images/2021/0126/235832_37a17e33_12260.jpeg "mybatis-plus.jpg")
 
 # 期望 | Futures
 

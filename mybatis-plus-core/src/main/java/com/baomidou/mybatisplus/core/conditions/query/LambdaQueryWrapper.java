@@ -1,17 +1,17 @@
 /*
- * Copyright (c) 2011-2020, baomidou (jobob@qq.com).
- * <p>
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not
- * use this file except in compliance with the License. You may obtain a copy of
- * the License at
- * <p>
- * https://www.apache.org/licenses/LICENSE-2.0
- * <p>
+ * Copyright (c) 2011-2021, baomidou (jobob@qq.com).
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
  * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
- * License for the specific language governing permissions and limitations under
- * the License.
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package com.baomidou.mybatisplus.core.conditions.query;
 
@@ -21,6 +21,7 @@ import com.baomidou.mybatisplus.core.conditions.segments.MergeSegments;
 import com.baomidou.mybatisplus.core.metadata.TableFieldInfo;
 import com.baomidou.mybatisplus.core.metadata.TableInfoHelper;
 import com.baomidou.mybatisplus.core.toolkit.ArrayUtils;
+import com.baomidou.mybatisplus.core.toolkit.Assert;
 import com.baomidou.mybatisplus.core.toolkit.support.SFunction;
 
 import java.util.Map;
@@ -42,35 +43,33 @@ public class LambdaQueryWrapper<T> extends AbstractLambdaWrapper<T, LambdaQueryW
      */
     private SharedString sqlSelect = new SharedString();
 
-    /**
-     * 不建议直接 new 该实例，使用 Wrappers.lambdaQuery(entity)
-     */
     public LambdaQueryWrapper() {
-        this(null);
+        this((T) null);
     }
 
-    /**
-     * 不建议直接 new 该实例，使用 Wrappers.lambdaQuery(entity)
-     */
     public LambdaQueryWrapper(T entity) {
         super.setEntity(entity);
         super.initNeed();
     }
 
-    /**
-     * 不建议直接 new 该实例，使用 Wrappers.lambdaQuery(...)
-     */
+    public LambdaQueryWrapper(Class<T> entityClass) {
+        super.setEntityClass(entityClass);
+        super.initNeed();
+    }
+
     LambdaQueryWrapper(T entity, Class<T> entityClass, SharedString sqlSelect, AtomicInteger paramNameSeq,
-                       Map<String, Object> paramNameValuePairs, MergeSegments mergeSegments,
-                       SharedString lastSql, SharedString sqlComment) {
+                       Map<String, Object> paramNameValuePairs, MergeSegments mergeSegments, SharedString paramAlias,
+                       SharedString lastSql, SharedString sqlComment, SharedString sqlFirst) {
         super.setEntity(entity);
+        super.setEntityClass(entityClass);
         this.paramNameSeq = paramNameSeq;
         this.paramNameValuePairs = paramNameValuePairs;
         this.expression = mergeSegments;
         this.sqlSelect = sqlSelect;
-        this.entityClass = entityClass;
+        this.paramAlias = paramAlias;
         this.lastSql = lastSql;
         this.sqlComment = sqlComment;
+        this.sqlFirst = sqlFirst;
     }
 
     /**
@@ -87,11 +86,6 @@ public class LambdaQueryWrapper<T> extends AbstractLambdaWrapper<T, LambdaQueryW
         return typedThis;
     }
 
-    @Override
-    public LambdaQueryWrapper<T> select(Predicate<TableFieldInfo> predicate) {
-        return select(entityClass, predicate);
-    }
-
     /**
      * 过滤查询的字段信息(主键除外!)
      * <p>例1: 只要 java 字段名以 "test" 开头的             -> select(i -&gt; i.getProperty().startsWith("test"))</p>
@@ -105,8 +99,13 @@ public class LambdaQueryWrapper<T> extends AbstractLambdaWrapper<T, LambdaQueryW
      */
     @Override
     public LambdaQueryWrapper<T> select(Class<T> entityClass, Predicate<TableFieldInfo> predicate) {
-        this.entityClass = entityClass;
-        this.sqlSelect.setStringValue(TableInfoHelper.getTableInfo(getCheckEntityClass()).chooseSelect(predicate));
+        if (entityClass == null) {
+            entityClass = getEntityClass();
+        } else {
+            setEntityClass(entityClass);
+        }
+        Assert.notNull(entityClass, "entityClass can not be null");
+        this.sqlSelect.setStringValue(TableInfoHelper.getTableInfo(entityClass).chooseSelect(predicate));
         return typedThis;
     }
 
@@ -121,7 +120,13 @@ public class LambdaQueryWrapper<T> extends AbstractLambdaWrapper<T, LambdaQueryW
      */
     @Override
     protected LambdaQueryWrapper<T> instance() {
-        return new LambdaQueryWrapper<>(entity, entityClass, null, paramNameSeq, paramNameValuePairs,
-            new MergeSegments(), SharedString.emptyString(), SharedString.emptyString());
+        return new LambdaQueryWrapper<>(getEntity(), getEntityClass(), null, paramNameSeq, paramNameValuePairs,
+            new MergeSegments(), paramAlias, SharedString.emptyString(), SharedString.emptyString(), SharedString.emptyString());
+    }
+
+    @Override
+    public void clear() {
+        super.clear();
+        sqlSelect.toNull();
     }
 }

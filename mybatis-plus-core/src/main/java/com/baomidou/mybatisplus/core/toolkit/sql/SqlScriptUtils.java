@@ -1,22 +1,24 @@
 /*
- * Copyright (c) 2011-2020, baomidou (jobob@qq.com).
- * <p>
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not
- * use this file except in compliance with the License. You may obtain a copy of
- * the License at
- * <p>
- * https://www.apache.org/licenses/LICENSE-2.0
- * <p>
+ * Copyright (c) 2011-2021, baomidou (jobob@qq.com).
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
  * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
- * License for the specific language governing permissions and limitations under
- * the License.
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package com.baomidou.mybatisplus.core.toolkit.sql;
 
 import com.baomidou.mybatisplus.core.toolkit.Constants;
 import com.baomidou.mybatisplus.core.toolkit.StringUtils;
+import org.apache.ibatis.type.JdbcType;
+import org.apache.ibatis.type.TypeHandler;
 
 /**
  * <p>
@@ -26,11 +28,8 @@ import com.baomidou.mybatisplus.core.toolkit.StringUtils;
  * @author miemie
  * @since 2018-08-15
  */
-public final class SqlScriptUtils implements Constants {
-
-    private SqlScriptUtils() {
-        // ignore
-    }
+@SuppressWarnings("serial")
+public abstract class SqlScriptUtils implements Constants {
 
     /**
      * <p>
@@ -63,16 +62,16 @@ public final class SqlScriptUtils implements Constants {
     public static String convertTrim(final String sqlScript, final String prefix, final String suffix,
                                      final String prefixOverrides, final String suffixOverrides) {
         StringBuilder sb = new StringBuilder("<trim");
-        if (StringUtils.isNotEmpty(prefix)) {
+        if (StringUtils.isNotBlank(prefix)) {
             sb.append(" prefix=\"").append(prefix).append(QUOTE);
         }
-        if (StringUtils.isNotEmpty(suffix)) {
+        if (StringUtils.isNotBlank(suffix)) {
             sb.append(" suffix=\"").append(suffix).append(QUOTE);
         }
-        if (StringUtils.isNotEmpty(prefixOverrides)) {
+        if (StringUtils.isNotBlank(prefixOverrides)) {
             sb.append(" prefixOverrides=\"").append(prefixOverrides).append(QUOTE);
         }
-        if (StringUtils.isNotEmpty(suffixOverrides)) {
+        if (StringUtils.isNotBlank(suffixOverrides)) {
             sb.append(" suffixOverrides=\"").append(suffixOverrides).append(QUOTE);
         }
         return sb.append(RIGHT_CHEV).append(NEWLINE).append(sqlScript).append(NEWLINE).append("</trim>").toString();
@@ -110,16 +109,16 @@ public final class SqlScriptUtils implements Constants {
     public static String convertForeach(final String sqlScript, final String collection, final String index,
                                         final String item, final String separator) {
         StringBuilder sb = new StringBuilder("<foreach");
-        if (StringUtils.isNotEmpty(collection)) {
+        if (StringUtils.isNotBlank(collection)) {
             sb.append(" collection=\"").append(collection).append(QUOTE);
         }
-        if (StringUtils.isNotEmpty(index)) {
+        if (StringUtils.isNotBlank(index)) {
             sb.append(" index=\"").append(index).append(QUOTE);
         }
-        if (StringUtils.isNotEmpty(item)) {
+        if (StringUtils.isNotBlank(item)) {
             sb.append(" item=\"").append(item).append(QUOTE);
         }
-        if (StringUtils.isNotEmpty(separator)) {
+        if (StringUtils.isNotBlank(separator)) {
             sb.append(" separator=\"").append(separator).append(QUOTE);
         }
         return sb.append(RIGHT_CHEV).append(NEWLINE).append(sqlScript).append(NEWLINE).append("</foreach>").toString();
@@ -158,7 +157,24 @@ public final class SqlScriptUtils implements Constants {
      * @return 脚本
      */
     public static String safeParam(final String param) {
-        return HASH_LEFT_BRACE + param + RIGHT_BRACE;
+        return safeParam(param, null);
+    }
+
+    /**
+     * <p>
+     * 安全入参:  #{入参,mapping}
+     * </p>
+     *
+     * @param param   入参
+     * @param mapping 映射
+     * @return 脚本
+     */
+    public static String safeParam(final String param, final String mapping) {
+        String target = HASH_LEFT_BRACE + param;
+        if (StringUtils.isBlank(mapping)) {
+            return target + RIGHT_BRACE;
+        }
+        return target + COMMA + mapping + RIGHT_BRACE;
     }
 
     /**
@@ -171,5 +187,50 @@ public final class SqlScriptUtils implements Constants {
      */
     public static String unSafeParam(final String param) {
         return DOLLAR_LEFT_BRACE + param + RIGHT_BRACE;
+    }
+
+    public static String mappingTypeHandler(Class<? extends TypeHandler<?>> typeHandler) {
+        if (typeHandler != null) {
+            return "typeHandler=" + typeHandler.getName();
+        }
+        return null;
+    }
+
+    public static String mappingJdbcType(JdbcType jdbcType) {
+        if (jdbcType != null) {
+            return "jdbcType=" + jdbcType.name();
+        }
+        return null;
+    }
+
+    public static String mappingNumericScale(Integer numericScale) {
+        if (numericScale != null) {
+            return "numericScale=" + numericScale;
+        }
+        return null;
+    }
+
+    public static String convertParamMapping(Class<? extends TypeHandler<?>> typeHandler, JdbcType jdbcType, Integer numericScale) {
+        if (typeHandler == null && jdbcType == null && numericScale == null) {
+            return null;
+        }
+        String mapping = null;
+        if (typeHandler != null) {
+            mapping = mappingTypeHandler(typeHandler);
+        }
+        if (jdbcType != null) {
+            mapping = appendMapping(mapping, mappingJdbcType(jdbcType));
+        }
+        if (numericScale != null) {
+            mapping = appendMapping(mapping, mappingNumericScale(numericScale));
+        }
+        return mapping;
+    }
+
+    private static String appendMapping(String mapping, String other) {
+        if (mapping != null) {
+            return mapping + COMMA + other;
+        }
+        return other;
     }
 }

@@ -1,24 +1,25 @@
 /*
- * Copyright (c) 2011-2020, baomidou (jobob@qq.com).
- * <p>
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not
- * use this file except in compliance with the License. You may obtain a copy of
- * the License at
- * <p>
- * https://www.apache.org/licenses/LICENSE-2.0
- * <p>
+ * Copyright (c) 2011-2021, baomidou (jobob@qq.com).
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
  * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
- * License for the specific language governing permissions and limitations under
- * the License.
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package com.baomidou.mybatisplus.extension.plugins.pagination;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.metadata.OrderItem;
 import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
-import org.jetbrains.annotations.Nullable;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -39,35 +40,53 @@ public class Page<T> implements IPage<T> {
     /**
      * 查询数据列表
      */
-    private List<T> records = Collections.emptyList();
+    protected List<T> records = Collections.emptyList();
 
     /**
      * 总数
      */
-    private long total = 0;
+    protected long total = 0;
     /**
      * 每页显示条数，默认 10
      */
-    private long size = 10;
+    protected long size = 10;
 
     /**
      * 当前页
      */
-    private long current = 1;
+    protected long current = 1;
 
     /**
      * 排序字段信息
      */
-    private List<OrderItem> orders = new ArrayList<>();
+    @Getter
+    @Setter
+    protected List<OrderItem> orders = new ArrayList<>();
 
     /**
      * 自动优化 COUNT SQL
      */
-    private boolean optimizeCountSql = true;
+    protected boolean optimizeCountSql = true;
     /**
      * 是否进行 count 查询
      */
-    private boolean isSearchCount = true;
+    protected boolean isSearchCount = true;
+    /**
+     * 是否命中count缓存
+     */
+    protected boolean hitCount = false;
+    /**
+     * countId
+     */
+    @Getter
+    @Setter
+    protected String countId;
+    /**
+     * countId
+     */
+    @Getter
+    @Setter
+    protected Long maxLimit;
 
     public Page() {
     }
@@ -161,20 +180,14 @@ public class Page<T> implements IPage<T> {
         return this;
     }
 
-    /**
-     * 获取当前正序排列的字段集合
-     * <p>
-     * 为了兼容，将在不久后废弃
-     *
-     * @return 正序排列的字段集合
-     * @see #getOrders()
-     * @deprecated 3.2.0
-     */
     @Override
-    @Nullable
-    @Deprecated
-    public String[] ascs() {
-        return CollectionUtils.isNotEmpty(orders) ? mapOrderToArray(OrderItem::isAsc) : null;
+    public String countId() {
+        return getCountId();
+    }
+
+    @Override
+    public Long maxLimit() {
+        return getMaxLimit();
     }
 
     /**
@@ -261,20 +274,6 @@ public class Page<T> implements IPage<T> {
     }
 
     /**
-     * 获取需简要倒序排列的字段数组
-     * <p>
-     *
-     * @return 倒序排列的字段数组
-     * @see #getOrders()
-     * @deprecated 3.2.0
-     */
-    @Override
-    @Deprecated
-    public String[] descs() {
-        return mapOrderToArray(i -> !i.isAsc());
-    }
-
-    /**
      * Replaced:{@link #addOrder(OrderItem...)}
      *
      * @param descs 需要倒序排列的字段
@@ -312,17 +311,13 @@ public class Page<T> implements IPage<T> {
         return getOrders();
     }
 
-    public List<OrderItem> getOrders() {
-        return orders;
-    }
-
-    public void setOrders(List<OrderItem> orders) {
-        this.orders = orders;
-    }
-
     @Override
     public boolean optimizeCountSql() {
         return optimizeCountSql;
+    }
+
+    public boolean isOptimizeCountSql() {
+        return optimizeCountSql();
     }
 
     @Override
@@ -341,5 +336,19 @@ public class Page<T> implements IPage<T> {
     public Page<T> setOptimizeCountSql(boolean optimizeCountSql) {
         this.optimizeCountSql = optimizeCountSql;
         return this;
+    }
+
+    @Override
+    public void hitCount(boolean hit) {
+        this.hitCount = hit;
+    }
+
+    public void setHitCount(boolean hit) {
+        this.hitCount = hit;
+    }
+
+    @Override
+    public boolean isHitCount() {
+        return hitCount;
     }
 }
